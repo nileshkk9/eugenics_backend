@@ -1,0 +1,23 @@
+{
+  "name": "eugenics_backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon -r dotenv/config src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.0.1",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.0.13",
+    "mysql": "^2.18.1",
+    "nodemailer": "^6.7.5",
+    "nodemon": "^2.0.15",
+    "sendmail": "^1.6.1"
+  }
+}
