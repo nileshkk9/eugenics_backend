@@ -15,6 +15,7 @@ user.login = async (userobj) => {
   const sql = `SELECT * FROM users WHERE username = '${userobj.username}' 
   AND password = '${userobj.password}'`;
   const res = await query(sql);
+  if (res.length === 0) throwError(`Invalid Username or Password`);
   return res;
 };
 
@@ -44,7 +45,29 @@ user.verifyRecovery = async ({ email, token, password }) => {
   } else {
     throwError(`No user with email = ${email} found or token expired`);
   }
-  return res
+  return res;
+};
+
+user.getDoctorsByUserId = async (user) => {
+  const sql = `SELECT DISTINCT d.name label FROM entries e 
+  INNER JOIN doctor d on e.docid = d.id WHERE e.uid = ${user.id}`;
+  const res = await query(sql);
+  return res;
+};
+
+
+
+user.getDoctorsQualification = async (user) => {
+  const sql = `SELECT DISTINCT qualification label FROM doctor`;
+  const res = await query(sql);
+  return res;
+};
+
+user.getLocationsByUserId = async (user) => {
+  const sql = `SELECT DISTINCT l.name label FROM entries e 
+  INNER JOIN location l on e.locid = l.id WHERE e.uid = ${user.id}`;
+  const res = await query(sql);
+  return res;
 };
 
 module.exports = user;

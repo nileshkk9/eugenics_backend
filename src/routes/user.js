@@ -26,34 +26,59 @@ router.post("/user/login", async (req, res, next) => {
 
 router.get("/user/me", auth, async (req, res, next) => {
   try {
-    res.send({"user":req.user});
+    res.send({ user: req.user });
   } catch (error) {
     next(error);
   }
 });
 
 router.post("/user/password-reset", async (req, res, next) => {
-    try {
-      const data = await userService.forgotpasswordMailer(req.body.email);
-      res.send({"message":"Recovery Mail Sent Successfully"});
-    } catch (error) {
-      next(error);
-    }
-  });
-  
-router.post("/user/password-reset/:email/:token", async (req, res, next) => {
   try {
-    const user = {
-      email: req.params.email,
-      token: req.params.token,
-      password: req.body.password
-    }
-    const data = await userService.verifyRecovery(user);
-    res.send({"message":"Password Changed Successfully"});
+    const data = await userService.forgotpasswordMailer(req.body.email);
+    res.send({ message: "Recovery Mail Sent Successfully" });
   } catch (error) {
     next(error);
   }
 });
 
+router.post("/user/password-reset/:email/:token", async (req, res, next) => {
+  try {
+    const user = {
+      email: req.params.email,
+      token: req.params.token,
+      password: req.body.password,
+    };
+    const data = await userService.verifyRecovery(user);
+    res.send({ message: "Password Changed Successfully" });
+  } catch (error) {
+    next(error);
+  }
+});
 
+router.post("/doctors", auth, async (req, res, next) => {
+  try {
+    const data = await userService.getDoctorsByUserId(req.user);
+    res.send(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/qualifications", auth, async (req, res, next) => {
+  try {
+    const data = await userService.getDoctorsQualification();
+    res.send(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/locations", auth, async (req, res, next) => {
+  try {
+    const data = await userService.getLocationsByUserId(req.user);
+    res.send(data);
+  } catch (error) {
+    next(error);
+  }
+});
 module.exports = router;

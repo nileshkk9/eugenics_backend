@@ -10,7 +10,7 @@ let errorlogger = (err, req, res, next) => {
         } else {
             res.status(500);
         }
-        res.json({ message: err.message });
+        res.json({ error: err.message });
         next();
 
     }
