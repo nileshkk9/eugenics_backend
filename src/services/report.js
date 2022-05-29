@@ -27,8 +27,8 @@ report.postReport = async (reportobj) => {
 };
 
 report.getReportsByUser = async (user, pagenumber) => {
-  const limit = 20;
-  const offset = limit * pagenumber - limit;
+  const limit = 10;
+  const offset = (limit * pagenumber) - limit;
   const sql = `SELECT e.id, d.name as docname, d.qualification as docquali, 
     l.name as locname, e.sample, e.chemists, e.partner, e.miscellaneous,e.date
     FROM entries e INNER JOIN doctor d on e.docid = d.id 
@@ -63,6 +63,29 @@ report.createExcel = async (user, date) => {
 
   return workbook;
 };
+
+report.getDoctorsByUserId = async (user) => {
+  const sql = `SELECT DISTINCT d.name label FROM entries e 
+  INNER JOIN doctor d on e.docid = d.id WHERE e.uid = ${user.id}`;
+  const res = await query(sql);
+  return res;
+};
+
+
+
+report.getDoctorsQualification = async (user) => {
+  const sql = `SELECT DISTINCT qualification label FROM doctor`;
+  const res = await query(sql);
+  return res;
+};
+
+report.getLocationsByUserId = async (user) => {
+  const sql = `SELECT DISTINCT l.name label FROM entries e 
+  INNER JOIN location l on e.locid = l.id WHERE e.uid = ${user.id}`;
+  const res = await query(sql);
+  return res;
+};
+
 
 const getDocId = async (docname, qualification) => {
   const findDocSql = `SELECT * FROM doctor WHERE name = '${docname.toUpperCase()}' 

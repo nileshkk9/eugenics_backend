@@ -26,7 +26,13 @@ router.post("/user/login", async (req, res, next) => {
 
 router.get("/user/me", auth, async (req, res, next) => {
   try {
-    res.send({ user: req.user });
+    const user = {...req.user}
+    delete user.password
+    delete user.auth_token
+    delete user.token
+    delete user.token_expire_time
+
+    res.send({ user });
   } catch (error) {
     next(error);
   }
@@ -55,30 +61,5 @@ router.post("/user/password-reset/:email/:token", async (req, res, next) => {
   }
 });
 
-router.post("/doctors", auth, async (req, res, next) => {
-  try {
-    const data = await userService.getDoctorsByUserId(req.user);
-    res.send(data);
-  } catch (error) {
-    next(error);
-  }
-});
 
-router.post("/qualifications", auth, async (req, res, next) => {
-  try {
-    const data = await userService.getDoctorsQualification();
-    res.send(data);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.post("/locations", auth, async (req, res, next) => {
-  try {
-    const data = await userService.getLocationsByUserId(req.user);
-    res.send(data);
-  } catch (error) {
-    next(error);
-  }
-});
 module.exports = router;
