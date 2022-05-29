@@ -2,7 +2,10 @@
   "name": "eugenics_backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
+  "engines": {
+    "node": "14.x"
+  },
   "scripts": {
     "dev": "nodemon -r dotenv/config src/app.js",
     "prod": "node src/app.js"
