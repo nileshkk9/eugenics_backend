@@ -10,7 +10,7 @@ const reportRouter = require("./routes/report");
 
 const errorlogger = require("./utils/errorLogger");
 
-const port = process.env.port || 2222;
+const port = process.env.PORT || 2222;
 
 app.use(express.json());
 app.use(userRouter);
