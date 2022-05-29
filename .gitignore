@@ -2,3 +2,4 @@
 .env
 /src/ErrorLogger.txt
 ErrorLogger.txt
+.vercel
