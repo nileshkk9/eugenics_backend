@@ -6,10 +6,6 @@
   "engines": {
     "node": "14.x"
   },
-  "scripts": {
-    "dev": "nodemon -r dotenv/config src/app.js",
-    "prod": "node src/app.js"
-  },
   "author": "",
   "license": "ISC",
   "dependencies": {
