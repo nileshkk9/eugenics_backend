@@ -41,10 +41,10 @@ router.post("/reports/create-excel", auth, async (req, res, next) => {
       startDate: req.body.startDate.substring(0, 10),
       endDate: req.body.endDate.substring(0, 10),
     };
-    const toDate = `${new Date().getDate()}-${new Date().getMonth()}-${new Date().getFullYear()}`
+    const toDate = `${new Date().getDate()}-${new Date().getMonth()}-${new Date().getFullYear()}`;
     const workbook = await reportService.createExcel(req.user, date);
     //IMPORTANT FOR React.js content-disposition get Name
-    res.setHeader('Access-Control-Expose-Headers', "Content-Disposition"); 
+    res.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
     res.setHeader(
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

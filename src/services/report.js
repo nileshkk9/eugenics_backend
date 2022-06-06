@@ -16,11 +16,12 @@ report.postReport = async (reportobj) => {
     geolocation,
     fullgeolocation,
   } = reportobj;
-  const docid = await getDocId(docname, qualification);
+  const docid = await getDocId(docname);
+  const qualiId = await getQualiId(qualification);
   const locid = await getLocId(locname);
-  const sql = `INSERT INTO entries (uid, docid, locid, sample, 
+  const sql = `INSERT INTO entries (uid, docid, qualiid, locid, sample, 
     chemists, partner, miscellaneous, geolocation, fullgeolocation, date) 
-    VALUES ('${uid}', '${docid}' , '${locid}', '${sample}','${chemists}','${partner}',
+    VALUES ('${uid}','${docid}','${qualiId}', '${locid}', '${sample}','${chemists}','${partner}',
     '${miscellaneous}','${geolocation}','${fullgeolocation}',NOW())`;
   const res = await query(sql);
   return res;
@@ -29,20 +30,22 @@ report.postReport = async (reportobj) => {
 report.getReportsByUser = async (user, pagenumber) => {
   const limit = 10;
   const offset = (limit * pagenumber) - limit;
-  const sql = `SELECT e.id, d.name as docname, d.qualification as docquali, 
+  const sql = `SELECT e.id, d.name as docname, q.qualification as docquali, 
     l.name as locname, e.sample, e.chemists, e.partner, e.miscellaneous,e.date
     FROM entries e INNER JOIN doctor d on e.docid = d.id 
     INNER JOIN location l on e.locid = l.id 
+    INNER JOIN qualification q on e.qualiid = q.id
     WHERE e.uid = '${user.id}' ORDER BY date DESC LIMIT ${limit} OFFSET ${offset} `;
   const res = await query(sql);
   return res;
 };
 
 report.createExcel = async (user, date) => {
-  const sql = `SELECT e.id, d.name as docname, d.qualification as docquali, 
+  const sql = `SELECT e.id, d.name as docname, q.qualification as docquali, 
     l.name as locname, e.sample, e.chemists, e.partner, e.miscellaneous,e.date
     FROM entries e INNER JOIN doctor d on e.docid = d.id 
     INNER JOIN location l on e.locid = l.id 
+    INNER JOIN qualification q on q.id = e.qualiid 
     WHERE e.uid = '${user.id}' AND e.date BETWEEN '${date.startDate}' AND '${date.endDate}'
     ORDER BY e.id`;
   const entries = await query(sql);
@@ -74,7 +77,7 @@ report.getDoctorsByUserId = async (user) => {
 
 
 report.getDoctorsQualification = async (user) => {
-  const sql = `SELECT DISTINCT qualification label FROM doctor`;
+  const sql = `SELECT DISTINCT qualification label FROM qualification`;
   const res = await query(sql);
   return res;
 };
@@ -87,14 +90,13 @@ report.getLocationsByUserId = async (user) => {
 };
 
 
-const getDocId = async (docname, qualification) => {
-  const findDocSql = `SELECT * FROM doctor WHERE name = '${docname.toUpperCase()}' 
-    AND  qualification = '${qualification.toUpperCase()}'`;
+const getDocId = async (docname) => {
+  const findDocSql = `SELECT * FROM doctor WHERE name = '${docname.toUpperCase()}'`;
   const resFindDoc = await query(findDocSql);
   if (resFindDoc.length > 0) return resFindDoc[0].id;
 
-  const insertDocSql = `INSERT INTO doctor (name, qualification) 
-      VALUES('${docname.toUpperCase()}' ,'${qualification.toUpperCase()}')`;
+  const insertDocSql = `INSERT INTO doctor (name) 
+      VALUES('${docname.toUpperCase()}')`;
   const resInsertDoc = await query(insertDocSql);
   return resInsertDoc.insertId;
 };
@@ -107,6 +109,17 @@ const getLocId = async (locname) => {
   const insertDocSql = `INSERT INTO location (name) VALUES('${locname.toUpperCase()}')`;
   const resInsertLoc = await query(insertDocSql);
   return resInsertLoc.insertId;
+};
+
+const getQualiId = async (qualification) => {
+  const findDocSql = `SELECT * FROM qualification WHERE qualification = '${qualification.toUpperCase()}'`;
+  const resFindDoc = await query(findDocSql);
+  if (resFindDoc.length > 0) return resFindDoc[0].id;
+
+  const insertQualiSql = `INSERT INTO qualification (qualification) 
+      VALUES('${qualification.toUpperCase()}')`;
+  const resInsertQuali= await query(insertQualiSql);
+  return resInsertQuali.insertId;
 };
 
 module.exports = report;

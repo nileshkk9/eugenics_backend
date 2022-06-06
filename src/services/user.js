@@ -5,7 +5,7 @@ const sendMail = require("../utils/mailTransporter");
 
 const user = {};
 user.addUser = async (userobj) => {
-  const sql = `INSERT INTO users (username, email, phn, name) VALUES ('${userobj.username}', '${userobj.email}' , '${userobj.phn}', '${userobj.name}')`;
+  const sql = `INSERT INTO users (username, password, email, phn, name, address) VALUES ('${userobj.username}', '${userobj.password}', '${userobj.email}' , '${userobj.phn}', '${userobj.name}', '${userobj.address}')`;
   const res = await query(sql);
   const token = await generateAuthToken(userobj);
   return token;

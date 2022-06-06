@@ -26,11 +26,11 @@ router.post("/user/login", async (req, res, next) => {
 
 router.get("/user/me", auth, async (req, res, next) => {
   try {
-    const user = {...req.user}
-    delete user.password
-    delete user.auth_token
-    delete user.token
-    delete user.token_expire_time
+    const user = { ...req.user };
+    delete user.password;
+    delete user.auth_token;
+    delete user.token;
+    delete user.token_expire_time;
 
     res.send({ user });
   } catch (error) {
@@ -60,6 +60,5 @@ router.post("/user/password-reset/:email/:token", async (req, res, next) => {
     next(error);
   }
 });
-
 
 module.exports = router;

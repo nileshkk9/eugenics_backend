@@ -8,11 +8,16 @@ const connection = mysql.createPool({
   database: process.env.DB_NAME,
 });
 
-// connection.connect(function (err) {
-//   if (err) throw err;
-//   console.log("Connected!");
-// });
+
+const connectionOld = mysql.createPool({
+  host: process.env.HOST,
+  user: process.env.DB_USER_OLD,
+  password: process.env.DB_PASS_OLD,
+  database: process.env.DB_NAME_OLD,
+});
+
 
 const query = util.promisify(connection.query).bind(connection);
+const queryOld = util.promisify(connectionOld.query).bind(connectionOld);
 
-module.exports = { connection, query };
+module.exports = { connection,connectionOld, query, queryOld };
