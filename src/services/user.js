@@ -2,7 +2,7 @@ const { query } = require("../db/mysql");
 const generateAuthToken = require("../utils/generateAuthToken");
 const { throwError, generateToken } = require("../utils/utils");
 const sendMail = require("../utils/mailTransporter");
-
+const {REACT_BASE_URL} = require("../utils/constants")
 const user = {};
 user.addUser = async (userobj) => {
   const sql = `INSERT INTO users (username, password, email, phn, name, address) VALUES ('${userobj.username}', '${userobj.password}', '${userobj.email}' , '${userobj.phn}', '${userobj.name}', '${userobj.address}')`;
@@ -29,7 +29,7 @@ user.forgotpasswordMailer = async (email) => {
   const sqlUpdateToken = `UPDATE users SET token='${token}', 
   token_expire_time=DATE_ADD(NOW(),INTERVAL 5 MINUTE) WHERE email='${email}'`;
   await query(sqlUpdateToken);
-  const url = "http://eugenicspharma.in";
+  const url = `${REACT_BASE_URL}/${email}/${token}`;
   await sendMail(email, url);
   return res;
 };
