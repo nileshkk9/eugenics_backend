@@ -71,7 +71,7 @@ router.post("/reports/doctors", auth, async (req, res, next) => {
 
 router.post("/reports/qualifications", auth, async (req, res, next) => {
   try {
-    const data = await reportService.getDoctorsQualification();
+    const data = await reportService.getDoctorsQualificationByUserId(req.user);
     res.send(data);
   } catch (error) {
     next(error);

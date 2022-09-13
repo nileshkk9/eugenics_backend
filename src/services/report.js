@@ -76,8 +76,9 @@ report.getDoctorsByUserId = async (user) => {
 
 
 
-report.getDoctorsQualification = async (user) => {
-  const sql = `SELECT DISTINCT qualification label FROM qualification`;
+report.getDoctorsQualificationByUserId = async (user) => {
+  const sql = `SELECT DISTINCT q.qualification label FROM entries e 
+  INNER JOIN qualification q on e.qualiid = q.id WHERE e.uid = ${user.id}`;
   const res = await query(sql);
   return res;
 };

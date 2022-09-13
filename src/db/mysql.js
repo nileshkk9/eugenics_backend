@@ -6,6 +6,8 @@ const connection = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
+  connectTimeout  : 3 * 60 * 60 * 1000,
+  timeout  : 3 * 60 * 60 * 1000,
 });
 
 
@@ -14,6 +16,8 @@ const connectionOld = mysql.createPool({
   user: process.env.DB_USER_OLD,
   password: process.env.DB_PASS_OLD,
   database: process.env.DB_NAME_OLD,
+  connectTimeout  : 3 * 60 * 60 * 1000,
+  timeout  : 3 * 60 * 60 * 1000,
 });
 
 

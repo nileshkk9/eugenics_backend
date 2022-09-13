@@ -1,23 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const { queryOld, query } = require("../db/mysql");
+const migrate = require("../services/migrationHelper");
 
 router.post("/migrate/doctors", async (req, res, next) => {
   try {
-    const doctorsOldSQL = `SELECT distinct UPPER(docname) as name FROM ${req.body.user}`;
-    const resOld = await queryOld(doctorsOldSQL);
-    const cleanData = resOld
-      .map((item) => cleanDoctorsName(item.name))
-      .slice(1);
-    const finalArray = [...new Set(cleanData)];
-
-    const response = await Promise.all(
-      finalArray.map((name) => {
-        return query(`INSERT INTO doctor(name) VALUE ('${name}')`);
-      })
-    );
-
-    res.send(finalArray);
+    const doctors = await migrate.doctor(req.body.user);
+    res.send(doctors);
   } catch (error) {
     console.log(error);
     next(error);
@@ -26,22 +15,8 @@ router.post("/migrate/doctors", async (req, res, next) => {
 
 router.post("/migrate/qualification", async (req, res, next) => {
   try {
-    const resOld = await queryOld(
-      `SELECT distinct UPPER(quali) as qualification FROM ${req.body.user}`
-    );
-    const cleanData = resOld
-      .map((item) => cleanDoctorQuali(item.qualification))
-      .slice(1);
-    const finalArray = [...new Set(cleanData)];
-    const response = await Promise.all(
-      finalArray.map((qualification) => {
-        return query(
-          `INSERT INTO qualification(qualification) VALUE ('${qualification}')`
-        );
-      })
-    );
-
-    res.send(finalArray);
+    const qualifications = await migrate.qualification(req.body.user);
+    res.send(qualifications);
   } catch (error) {
     console.log(error);
     next(error);
@@ -50,42 +25,8 @@ router.post("/migrate/qualification", async (req, res, next) => {
 
 router.post("/migrate/location", async (req, res, next) => {
   try {
-    const resOld = await queryOld(
-      `SELECT UPPER(place) as name FROM ${req.body.user}`
-    );
-    const cleanData = resOld.map((item) => cleanLocation(item.name)).slice(1);
-    const finalArray = [...new Set(cleanData)];
-
-    const response = await Promise.all(
-      finalArray.map((locationName) => {
-        const insertLocationSQL = `INSERT INTO location(name) VALUE ('${locationName}')`;
-        return query(insertLocationSQL);
-      })
-    );
-
-    res.send(finalArray);
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-});
-
-router.post("/migrate/qualification", async (req, res, next) => {
-  try {
-    const resOld = await queryOld(
-      `SELECT UPPER(place) as name FROM ${req.body.user}`
-    );
-    const cleanData = resOld.map((item) => cleanLocation(item.name)).slice(1);
-    const finalArray = [...new Set(cleanData)];
-
-    const response = await Promise.all(
-      finalArray.map((locationName) => {
-        const insertLocationSQL = `INSERT INTO location(name) VALUE ('${locationName}')`;
-        return query(insertLocationSQL);
-      })
-    );
-
-    res.send(finalArray);
+    const locations = await migrate.location(req.body.user);
+    res.send(locations);
   } catch (error) {
     console.log(error);
     next(error);
@@ -94,96 +35,101 @@ router.post("/migrate/qualification", async (req, res, next) => {
 
 router.post("/migrate/entries", async (req, res, next) => {
   try {
-    const resOld = await queryOld(`SELECT * FROM ${req.body.user}`);
-    const cleanData = resOld
-      .map((item) => {
-        return {
-          ...item,
-          docname: cleanDoctorsName(item.docname),
-          place: cleanLocation(item.place),
-          qualification: cleanDoctorQuali(item.quali),
-        };
-      })
-      .slice(1);
-    const doctors = await query(`SELECT * from doctor`);
-    const locations = await query(`SELECT * from location`);
-    const qualification = await query(`SELECT * from qualification`);
-    const response = await Promise.all(
-      cleanData.map(async (element) => {
-        const doc = doctors.find((item) => item.name === element.docname);
-        const loc = locations.find((item) => item.name === element.place);
-        const quali = qualification.find(
-          (item) => item.qualification === element.qualification
-        );
-        if (
-          doc.id == undefined ||
-          loc == undefined ||
-          loc.id == undefined ||
-          quali == undefined ||
-          quali.id == undefined
-        ) {
-          console.log("ERROR ONNNNN", element);
-        }
-        let chemists = "";
-        for (let i = 1; i <= 6; i++) {
-          const c = element[`chemist${i}`];
-          if (c !== "") {
-            if (i == 1) chemists += `${c}`;
-            else chemists += `,${c}`;
-          }
-        }
-        const res = await query(`INSERT INTO entries 
-      (uid, docid, qualiid, locid, sample, chemists, partner, miscellaneous, geolocation, fullgeolocation, date) 
-      VALUES ('${req.body.uid}',
-      '${doc.id}',
-      '${quali.id}',
-      '${loc.id}','
-      ${element.sample}','${chemists}',
-      '${element.worked}','${element.other}','${element.location}','${
-          element.fulladdress
-        }','${new Date(element.date).toISOString()}')`);
-        return res;
-      })
-    );
-
-    res.send(cleanData);
+    const entries = await migrate.entries(req.body.user);
+    res.send(entries);
   } catch (error) {
     console.log(error);
     next(error);
   }
 });
 
-const cleanLocation = (name) => {
-  return name
-    .replace(/[^a-zA-Z ]/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toUpperCase();
-};
-const cleanDoctorsName = (name) => {
-  const pattern = /\b(?:dr\.? *|dr\. *)\b/gi;
-  const newName = name
-    .replace(pattern, "")
-    .replace(/ *\([^)]*\) */g, "")
-    .replace(/[^a-zA-Z ]/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toUpperCase();
-  if (newName.startsWith("Dr") || newName.startsWith("dr"))
-    return newName.substring(2);
-  return newName;
-};
+router.post("/migrate/all", async (req, res, next) => {
+  try {
+    // const allUsers = await query(`SELECT username FROM users`);
+    const allUsers = [
+      // {
+      //   username: "adas0697",
+      // },
+      // {
+      //   username: "dibakar_bala",
+      // },
+      // {
+      //   username: "dshil",
+      // },
+      // {
+      //   username: "haldertapas492",
+      // },
+      // {
+      //   username: "jagharami",
+      // },
+      // {
+      //   username: "kghosh",
+      // },
+      // {
+      //   username: "mjoardar",
+      // },
+      // {
+      //   username: "nileshkk9",
+      // },
+      {
+        username: "radhikari",
+      },
+      {
+        username: "ravi_pathak",
+      },
+      {
+        username: "sghosh",
+      },
+      {
+        username: "shalder",
+      },
+      {
+        username: "shmondal",
+      },
+      {
+        username: "shossain",
+      },
+      {
+        username: "sibag",
+      },
+      {
+        username: "skumar",
+      },
+      {
+        username: "sourav_mondal",
+      },
+      {
+        username: "ssbadsa",
+      },
+    ];
+    const response = await Promise.all(
+      allUsers.map(async (item) => {
+        const { username } = item;
+        console.log(`START user=${username} migration started`);
+        await migrate.doctor(username);
+        console.log(`END user=${username} migration completed`);
+      })
+    );
 
-const cleanDoctorQuali = (qualification) => {
-  if (qualification !== "") {
-    return qualification
-      .split(",")[0]
-      .replace(/ *\([^)]*\) */g, "")
-      .replace(/[^a-zA-Z ]/g, "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toUpperCase();
+    res.send({ status: "completed" });
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
-  return "MBBS";
-};
+});
+
+router.post("/migrate/deleteall", async (req, res, next) => {
+  try {
+    await query(`DELETE FROM doctor WHERE 1`);
+    await query(`DELETE FROM location WHERE 1`);
+    await query(`DELETE FROM qualification WHERE 1`);
+    await query(`DELETE FROM entries WHERE 1`);
+
+    res.send({ status: "completed" });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
 module.exports = router;
