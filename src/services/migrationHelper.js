@@ -12,9 +12,9 @@ migrate.doctor = async (user) => {
       return query(`INSERT INTO doctor(name) VALUE ('${name}')`);
     })
   );
-  //   return finalArray;
+    return finalArray;
 
-  await migrate.qualification(user);
+//   await migrate.qualification(user);
 };
 
 migrate.qualification = async (user) => {
@@ -33,8 +33,8 @@ migrate.qualification = async (user) => {
     })
   );
 
-  //   return finalArray;
-  await migrate.location(user);
+    return finalArray;
+//   await migrate.location(user);
 };
 
 migrate.location = async (user) => {
@@ -50,12 +50,11 @@ migrate.location = async (user) => {
     })
   );
 
-  //   return finalArray;
-  await migrate.entries(user);
+    return finalArray;
+//   await migrate.entries(user);
 };
 
 migrate.entries = async (user) => {
-//   console.log(`ENTRIES user=${user} migration completed`);
 
   const resOld = await queryOld(`SELECT * FROM ${user}`);
   const currentUser = await query(
@@ -113,7 +112,6 @@ migrate.entries = async (user) => {
     })
   );
 
-//   console.log(`ENTRIES user=${user} migration completed`);
 
   return cleanData;
 };

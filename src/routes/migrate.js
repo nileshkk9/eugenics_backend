@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { queryOld, query } = require("../db/mysql");
+const { query } = require("../db/mysql");
 const migrate = require("../services/migrationHelper");
 
 router.post("/migrate/doctors", async (req, res, next) => {
@@ -45,63 +45,7 @@ router.post("/migrate/entries", async (req, res, next) => {
 
 router.post("/migrate/all", async (req, res, next) => {
   try {
-    // const allUsers = await query(`SELECT username FROM users`);
-    const allUsers = [
-      // {
-      //   username: "adas0697",
-      // },
-      // {
-      //   username: "dibakar_bala",
-      // },
-      // {
-      //   username: "dshil",
-      // },
-      // {
-      //   username: "haldertapas492",
-      // },
-      // {
-      //   username: "jagharami",
-      // },
-      // {
-      //   username: "kghosh",
-      // },
-      // {
-      //   username: "mjoardar",
-      // },
-      // {
-      //   username: "nileshkk9",
-      // },
-      {
-        username: "radhikari",
-      },
-      {
-        username: "ravi_pathak",
-      },
-      {
-        username: "sghosh",
-      },
-      {
-        username: "shalder",
-      },
-      {
-        username: "shmondal",
-      },
-      {
-        username: "shossain",
-      },
-      {
-        username: "sibag",
-      },
-      {
-        username: "skumar",
-      },
-      {
-        username: "sourav_mondal",
-      },
-      {
-        username: "ssbadsa",
-      },
-    ];
+    const allUsers = await query(`SELECT username FROM users`);
     const response = await Promise.all(
       allUsers.map(async (item) => {
         const { username } = item;
