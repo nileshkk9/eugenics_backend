@@ -42,7 +42,7 @@ report.getReportsByUser = async (user, pagenumber) => {
 
 report.createExcel = async (user, date) => {
   const sql = `SELECT e.id, d.name as docname, q.qualification as docquali, 
-    l.name as locname, e.sample, e.chemists, e.partner, e.miscellaneous,e.date
+    l.name as locname, e.sample, e.chemists, e.partner, e.miscellaneous,e.date, e.fullgeolocation
     FROM entries e INNER JOIN doctor d on e.docid = d.id 
     INNER JOIN location l on e.locid = l.id 
     INNER JOIN qualification q on q.id = e.qualiid 
@@ -61,6 +61,7 @@ report.createExcel = async (user, date) => {
     { header: "Worked With", key: "partner", width: 20 },
     { header: "Miscellaneous", key: "miscellaneous", width: 20 },
     { header: "Date", key: "date", width: 10 },
+    { header: "Geo Location", key: "fullgeolocation", width: 30 }
   ];
   worksheet.addRows(entries);
 
