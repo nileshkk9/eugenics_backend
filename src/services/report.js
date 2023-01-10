@@ -29,13 +29,31 @@ report.postReport = async (reportobj) => {
 
 report.getReportsByUser = async (user, pagenumber) => {
   const limit = 10;
-  const offset = (limit * pagenumber) - limit;
+  const offset = limit * pagenumber - limit;
   const sql = `SELECT e.id, d.name as docname, q.qualification as docquali, 
     l.name as locname, e.sample, e.chemists, e.partner, e.miscellaneous,e.date
     FROM entries e INNER JOIN doctor d on e.docid = d.id 
     INNER JOIN location l on e.locid = l.id 
     INNER JOIN qualification q on e.qualiid = q.id
     WHERE e.uid = '${user.id}' ORDER BY date DESC LIMIT ${limit} OFFSET ${offset} `;
+  const res = await query(sql);
+  return res;
+};
+
+report.getAllEntriesByUser = async (
+  username,
+  startDate,
+  endDate
+) => {
+  const userRes = await query(
+    `SELECT * FROM users WHERE username='${username}'`
+  );
+  const sql = `SELECT e.id, d.name as docname, q.qualification as docquali, 
+    l.name as locname, e.sample, e.chemists, e.partner, e.miscellaneous,e.date, e.fullgeolocation
+    FROM entries e INNER JOIN doctor d on e.docid = d.id 
+    INNER JOIN location l on e.locid = l.id 
+    INNER JOIN qualification q on e.qualiid = q.id
+    WHERE e.uid = '${userRes[0].id}' AND e.date BETWEEN '${startDate}' AND '${endDate}' ORDER BY date DESC`;
   const res = await query(sql);
   return res;
 };
@@ -61,7 +79,7 @@ report.createExcel = async (user, date) => {
     { header: "Worked With", key: "partner", width: 20 },
     { header: "Miscellaneous", key: "miscellaneous", width: 20 },
     { header: "Date", key: "date", width: 10 },
-    { header: "Geo Location", key: "fullgeolocation", width: 30 }
+    { header: "Geo Location", key: "fullgeolocation", width: 30 },
   ];
   worksheet.addRows(entries);
 
@@ -74,8 +92,6 @@ report.getDoctorsByUserId = async (user) => {
   const res = await query(sql);
   return res;
 };
-
-
 
 report.getDoctorsQualificationByUserId = async (user) => {
   const sql = `SELECT DISTINCT q.qualification label FROM entries e 
@@ -90,7 +106,6 @@ report.getLocationsByUserId = async (user) => {
   const res = await query(sql);
   return res;
 };
-
 
 const getDocId = async (docname) => {
   const findDocSql = `SELECT * FROM doctor WHERE name = '${docname.toUpperCase()}'`;
@@ -120,7 +135,7 @@ const getQualiId = async (qualification) => {
 
   const insertQualiSql = `INSERT INTO qualification (qualification) 
       VALUES('${qualification.toUpperCase()}')`;
-  const resInsertQuali= await query(insertQualiSql);
+  const resInsertQuali = await query(insertQualiSql);
   return resInsertQuali.insertId;
 };
 

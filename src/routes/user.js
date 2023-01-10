@@ -38,6 +38,15 @@ router.get("/user/me", auth, async (req, res, next) => {
   }
 });
 
+router.get("/user/all", auth, async (req, res, next) => {
+  try {
+    const data = await userService.getRegionalUsers();
+    res.send({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post("/user/password-reset", async (req, res, next) => {
   try {
     const data = await userService.forgotpasswordMailer(req.body.email);

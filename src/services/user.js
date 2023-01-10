@@ -2,7 +2,7 @@ const { query } = require("../db/mysql");
 const generateAuthToken = require("../utils/generateAuthToken");
 const { throwError, generateToken } = require("../utils/utils");
 const sendMail = require("../utils/mailTransporter");
-const {REACT_BASE_URL} = require("../utils/constants")
+const { REACT_BASE_URL } = require("../utils/constants");
 const user = {};
 user.addUser = async (userobj) => {
   const sql = `INSERT INTO users (username, password, email, phn, name, address) VALUES ('${userobj.username}', '${userobj.password}', '${userobj.email}' , '${userobj.phn}', '${userobj.name}', '${userobj.address}')`;
@@ -16,6 +16,13 @@ user.login = async (userobj) => {
   AND password = '${userobj.password}'`;
   const res = await query(sql);
   if (res.length === 0) throwError(`Invalid Username or Password`);
+  return res;
+};
+
+user.getRegionalUsers = async () => {
+  const sql = `SELECT id, username FROM users`;
+  const res = await query(sql);
+  if (res.length === 0) throwError(`Empty user DB`);
   return res;
 };
 

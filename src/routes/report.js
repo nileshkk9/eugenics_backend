@@ -2,6 +2,7 @@ const express = require("express");
 const reportService = require("../services/report");
 const router = express.Router();
 const auth = require("../middleware/auth");
+const { throwError } = require("../utils/utils");
 router.post("/report", auth, async (req, res, next) => {
   try {
     const report = {
@@ -35,8 +36,25 @@ router.get("/reports/:pagenumber", auth, async (req, res, next) => {
   }
 });
 
+router.post("/regional-report", auth, async (req, res, next) => {
+  try {
+    if (req.user.level === "EMP") {
+      throwError("EMP Level Not Authorized", 404);
+    }
+    const data = await reportService.getAllEntriesByUser(
+      req.body.username,
+      req.body.startDate,
+      req.body.endDate
+    );
+    res.send(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post("/reports/create-excel", auth, async (req, res, next) => {
   try {
+    console.log(req.body.startDate);
     const date = {
       startDate: req.body.startDate.substring(0, 10),
       endDate: req.body.endDate.substring(0, 10),
