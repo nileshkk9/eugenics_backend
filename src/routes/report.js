@@ -41,10 +41,12 @@ router.post("/regional-report", auth, async (req, res, next) => {
     if (req.user.level === "EMP") {
       throwError("EMP Level Not Authorized", 404);
     }
+    const s = new Date(req.body.startDate);
+    const e = new Date(req.body.endDate);
     const data = await reportService.getAllEntriesByUser(
       req.body.username,
-      req.body.startDate,
-      req.body.endDate
+      `${s.getFullYear()}-${s.getMonth() + 1}-${s.getDate()}`,
+      `${e.getFullYear()}-${e.getMonth() + 1}-${e.getDate()}`
     );
     res.send(data);
   } catch (error) {

@@ -19,10 +19,10 @@ report.postReport = async (reportobj) => {
   const docid = await getDocId(docname);
   const qualiId = await getQualiId(qualification);
   const locid = await getLocId(locname);
-  const sql = `INSERT INTO entries (uid, docid, qualiid, locid, sample, 
-    chemists, partner, miscellaneous, geolocation, fullgeolocation, date) 
+  const sql = `INSERT INTO entries (uid, docid, qualiid, locid, sample,
+    chemists, partner, miscellaneous, geolocation, fullgeolocation, date)
     VALUES ('${uid}','${docid}','${qualiId}', '${locid}', '${sample}','${chemists}','${partner}',
-    '${miscellaneous}','${geolocation}','${fullgeolocation}',NOW())`;
+    '${miscellaneous}','${geolocation}','${fullgeolocation}', CONVERT_TZ(Now(),'+00:00','+05:30'))`;
   const res = await query(sql);
   return res;
 };
@@ -40,11 +40,7 @@ report.getReportsByUser = async (user, pagenumber) => {
   return res;
 };
 
-report.getAllEntriesByUser = async (
-  username,
-  startDate,
-  endDate
-) => {
+report.getAllEntriesByUser = async (username, startDate, endDate) => {
   const userRes = await query(
     `SELECT * FROM users WHERE username='${username}'`
   );
