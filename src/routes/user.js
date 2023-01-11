@@ -40,6 +40,9 @@ router.get("/user/me", auth, async (req, res, next) => {
 
 router.get("/user/all", auth, async (req, res, next) => {
   try {
+    if (req.user.level === "EMP") {
+      throwError("EMP Level Not Authorized", 404);
+    }
     const data = await userService.getRegionalUsers();
     res.send({ data });
   } catch (error) {
