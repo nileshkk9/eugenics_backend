@@ -43,7 +43,7 @@ report.getReportsByUser = async (user, pagenumber) => {
       timeZone: "Asia/Kolkata",
     }),
   }));
-  return r;
+  return res;
 };
 
 report.getAllEntriesByUser = async (username, startDate, endDate) => {
