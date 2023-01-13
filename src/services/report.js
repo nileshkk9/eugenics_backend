@@ -31,13 +31,17 @@ report.getReportsByUser = async (user, pagenumber) => {
   const limit = 10;
   const offset = limit * pagenumber - limit;
   const sql = `SELECT e.id, d.name as docname, q.qualification as docquali, 
-    l.name as locname, e.sample, e.chemists, e.partner, e.miscellaneous,CONVERT_TZ(e.date,'+05:30','+05:30') date
+    l.name as locname, e.sample, e.chemists, e.partner, e.miscellaneous,e.date
     FROM entries e INNER JOIN doctor d on e.docid = d.id 
     INNER JOIN location l on e.locid = l.id 
     INNER JOIN qualification q on e.qualiid = q.id
     WHERE e.uid = '${user.id}' ORDER BY date DESC LIMIT ${limit} OFFSET ${offset} `;
   const res = await query(sql);
-  return res;
+  const r = res.map((item) => ({
+    ...item,
+    date: new Date(item.date).toLocaleString(),
+  }));
+  return r;
 };
 
 report.getAllEntriesByUser = async (username, startDate, endDate) => {
