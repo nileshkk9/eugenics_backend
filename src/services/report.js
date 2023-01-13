@@ -47,6 +47,7 @@ report.getReportsByUser = async (user, pagenumber) => {
 };
 
 report.getAllEntriesByUser = async (username, startDate, endDate) => {
+  // console.log(username, startDate, endDate);
   const userRes = await query(
     `SELECT * FROM users WHERE username='${username}'`
   );
