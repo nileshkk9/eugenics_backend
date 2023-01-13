@@ -49,8 +49,8 @@ router.post("/regional-report", auth, async (req, res, next) => {
     });
     const data = await reportService.getAllEntriesByUser(
       req.body.username,
-      `${s.split("/")[2].split(",")[0]}-${s.split("/")[1]}-${s.split("/")[0]}`,
-      `${e.split("/")[2].split(",")[0]}-${e.split("/")[1]}-${e.split("/")[0]}`
+      `${s.split("/")[2].split(",")[0]}-${s.split("/")[0]}-${s.split("/")[1]}`,
+      `${e.split("/")[2].split(",")[0]}-${e.split("/")[0]}-${e.split("/")[1]}`
     );
     res.send(data);
   } catch (error) {
