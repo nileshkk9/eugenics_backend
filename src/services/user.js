@@ -19,8 +19,15 @@ user.login = async (userobj) => {
   return res;
 };
 
-user.getRegionalUsers = async () => {
-  const sql = `SELECT id, username, name FROM users WHERE isactive = 1 AND level = 'EMP'`;
+user.getRegionalUsers = async (user) => {
+  let sql = "";
+  if (user.level === "EMP") {
+    throwError("EMP Level Not Authorized", 404);
+  } else if (user.level === "MANAGER") {
+    sql = `SELECT id, username, name FROM users WHERE isactive = 1 AND level = 'EMP'`;
+  } else if (user.level === "ADMIN") {
+    sql = `SELECT id, username, name FROM users`;
+  }
   const res = await query(sql);
   if (res.length === 0) throwError(`Empty user DB`);
   return res;
