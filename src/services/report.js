@@ -31,7 +31,7 @@ report.getReportsByUser = async (user, pagenumber) => {
   const limit = 10;
   const offset = limit * pagenumber - limit;
   const sql = `SELECT e.id, d.name as docname, q.qualification as docquali, 
-    l.name as locname, e.sample, e.chemists, e.partner, e.miscellaneous,e.date
+    l.name as locname, e.sample, e.chemists, e.partner, e.miscellaneous,CONVERT_TZ(e.date,'+05:30','+05:30') date
     FROM entries e INNER JOIN doctor d on e.docid = d.id 
     INNER JOIN location l on e.locid = l.id 
     INNER JOIN qualification q on e.qualiid = q.id

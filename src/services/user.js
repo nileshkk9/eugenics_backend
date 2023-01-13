@@ -20,7 +20,7 @@ user.login = async (userobj) => {
 };
 
 user.getRegionalUsers = async () => {
-  const sql = `SELECT id, username, name FROM users`;
+  const sql = `SELECT id, username, name FROM users WHERE isactive = 1 AND level = 'EMP'`;
   const res = await query(sql);
   if (res.length === 0) throwError(`Empty user DB`);
   return res;
