@@ -47,7 +47,6 @@ router.post("/regional-report", auth, async (req, res, next) => {
     const e = new Date(req.body.endDate).toLocaleString(undefined, {
       timeZone: "Asia/Kolkata",
     });
-    // console.log(s, e);
     const data = await reportService.getAllEntriesByUser(
       req.body.username,
       `${s.split("/")[2].split(",")[0]}-${s.split("/")[0]}-${s.split("/")[1]}`,

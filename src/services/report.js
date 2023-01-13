@@ -37,12 +37,6 @@ report.getReportsByUser = async (user, pagenumber) => {
     INNER JOIN qualification q on e.qualiid = q.id
     WHERE e.uid = '${user.id}' ORDER BY date DESC LIMIT ${limit} OFFSET ${offset} `;
   const res = await query(sql);
-  const r = res.map((item) => ({
-    ...item,
-    date: new Date(item.date).toLocaleString(undefined, {
-      timeZone: "Asia/Kolkata",
-    }),
-  }));
   return res;
 };
 
@@ -56,15 +50,8 @@ report.getAllEntriesByUser = async (username, startDate, endDate) => {
     INNER JOIN location l on e.locid = l.id 
     INNER JOIN qualification q on e.qualiid = q.id
     WHERE e.uid = '${userRes[0].id}' AND e.date BETWEEN '${startDate}' AND '${endDate}' ORDER BY date DESC`;
-
   const res = await query(sql);
-  const r = res.map((item) => ({
-    ...item,
-    date: new Date(item.date).toLocaleString(undefined, {
-      timeZone: "Asia/Kolkata",
-    }),
-  }));
-  return r;
+  return res;
 };
 
 report.createExcel = async (user, date) => {
