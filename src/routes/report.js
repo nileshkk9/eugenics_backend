@@ -3,6 +3,8 @@ const reportService = require("../services/report");
 const router = express.Router();
 const auth = require("../middleware/auth");
 const { throwError } = require("../utils/utils");
+const moment = require("moment");
+
 router.post("/report", auth, async (req, res, next) => {
   try {
     const report = {
@@ -41,12 +43,14 @@ router.post("/regional-report", auth, async (req, res, next) => {
     if (req.user.level === "EMP") {
       throwError("EMP Level Not Authorized", 404);
     }
+    
     const s = new Date(req.body.startDate).toLocaleString(undefined, {
       timeZone: "Asia/Kolkata",
     });
     const e = new Date(req.body.endDate).toLocaleString(undefined, {
       timeZone: "Asia/Kolkata",
     });
+    console.log(req.body, s, e);
     const data = await reportService.getAllEntriesByUser(
       req.body.username,
       `${s.split("/")[2].split(",")[0]}-${s.split("/")[0]}-${s.split("/")[1]}`,
@@ -60,12 +64,10 @@ router.post("/regional-report", auth, async (req, res, next) => {
 
 router.post("/reports/create-excel", auth, async (req, res, next) => {
   try {
-    console.log(req.body.startDate);
     const date = {
       startDate: req.body.startDate.substring(0, 10),
       endDate: req.body.endDate.substring(0, 10),
     };
-    const toDate = `${new Date().getDate()}-${new Date().getMonth()}-${new Date().getFullYear()}`;
     const workbook = await reportService.createExcel(req.user, date);
     //IMPORTANT FOR React.js content-disposition get Name
     res.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
@@ -75,7 +77,8 @@ router.post("/reports/create-excel", auth, async (req, res, next) => {
     );
     res.setHeader(
       "Content-Disposition",
-      "attachment; filename=" + `${req.user.username}_${toDate}.xlsx`
+      "attachment; filename=" +
+        `${req.user.username}_${moment().format("DD-mm-yyyy")}.xlsx`
     );
     await workbook.xlsx.write(res);
     res.send();

@@ -1,6 +1,7 @@
 const { query } = require("../db/mysql");
 const { throwError } = require("../utils/utils");
 const excel = require("exceljs");
+const moment = require("moment");
 
 const report = {};
 report.postReport = async (reportobj) => {
@@ -22,7 +23,10 @@ report.postReport = async (reportobj) => {
   const sql = `INSERT INTO entries (uid, docid, qualiid, locid, sample,
     chemists, partner, miscellaneous, geolocation, fullgeolocation, date)
     VALUES ('${uid}','${docid}','${qualiId}', '${locid}', '${sample}','${chemists}','${partner}',
-    '${miscellaneous}','${geolocation}','${fullgeolocation}', CONVERT_TZ(Now(),'+00:00','+05:30'))`;
+    '${miscellaneous}','${geolocation}','${fullgeolocation}','${moment
+    .utc()
+    .utcOffset(330)
+    .format("YYYY-MM-DD HH:mm:ss")}')`;
   const res = await query(sql);
   return res;
 };

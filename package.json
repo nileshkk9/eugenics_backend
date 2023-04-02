@@ -5,7 +5,7 @@
   "main": "src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
+    },
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -15,6 +15,7 @@
     "exceljs": "^4.3.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.4",
     "mongoose": "^6.0.13",
     "mysql": "^2.18.1",
     "nodemailer": "^6.7.5",
