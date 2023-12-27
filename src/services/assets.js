@@ -17,4 +17,10 @@ assets.getProductById = async (id) => {
   const res = await queryWebsite(sql);
   return res;
 };
+
+assets.getProductByParameter = async (column, value) => {
+  const sql = `SELECT * from products WHERE ${column} = '${value}'`;
+  const res = await queryWebsite(sql);
+  return res;
+};
 module.exports = assets;

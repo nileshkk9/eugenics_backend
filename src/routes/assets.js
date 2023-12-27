@@ -28,5 +28,16 @@ router.get('/product/:id', async (req, res, next) => {
     next(error);
   }
 });
+router.post('/product/getProductByParam', async (req, res, next) => {
+  try {
+    const data = await assetService.getProductByParameter(
+      req.body.column,
+      req.body.value
+    );
+    res.send(data);
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;
