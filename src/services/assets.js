@@ -7,7 +7,7 @@ assets.getCarouselImages = async () => {
   return res;
 };
 assets.getProductDetails = async () => {
-  const sql = 'SELECT * from products';
+  const sql = 'SELECT * from products WHERE isACtive = 1';
   const res = await queryWebsite(sql);
   return res;
 };
