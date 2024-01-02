@@ -1,9 +1,10 @@
-const nodemailer = require("nodemailer");
+const nodemailer = require('nodemailer');
 const path = require('path');
+const { COMPANY_EMAIL } = require('./constants');
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  name: "eugenicspharma.in",
+  name: 'eugenicspharma.in',
   port: 587,
   secure: false,
   auth: {
@@ -15,22 +16,22 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendMail = async (receiverEmail,url) => {
+const sendForgetPasswordMail = async (receiverEmail, url) => {
   try {
     const data = await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: receiverEmail,
-      subject: "Reset Password",
+      subject: 'Reset Password',
       attachments: [
         {
-          filename: "header.png",
+          filename: 'header.png',
           path: path.join(__dirname, '/images/header.png'),
-          cid: "header.png",
+          cid: 'header.png',
         },
         {
-          filename: "background.png",
+          filename: 'background.png',
           path: path.join(__dirname, '/images/background.png'),
-          cid: "background.png", 
+          cid: 'background.png',
         },
       ],
       html: `<!DOCTYPE html>
@@ -420,4 +421,25 @@ const sendMail = async (receiverEmail,url) => {
   }
 };
 
-module.exports = sendMail;
+const sendContactUsMail = async (
+  name,
+  email,
+  phoneNumber,
+  subject,
+  message
+) => {
+  try {
+    await transporter.sendMail({
+      from: email,
+      to: COMPANY_EMAIL,
+      subject: `MAIL FROM WEBSITE ${subject}`,
+      attachments: [],
+      html: `Name: ${name} <br> Phone: ${phoneNumber} <br> ${message}`,
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+module.exports = { sendForgetPasswordMail, sendContactUsMail };

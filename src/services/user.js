@@ -1,8 +1,11 @@
-const { query } = require("../db/mysql");
-const generateAuthToken = require("../utils/generateAuthToken");
-const { throwError, generateToken } = require("../utils/utils");
-const sendMail = require("../utils/mailTransporter");
-const { REACT_BASE_URL } = require("../utils/constants");
+const { query } = require('../db/mysql');
+const generateAuthToken = require('../utils/generateAuthToken');
+const { throwError, generateToken } = require('../utils/utils');
+const {
+  sendContactUsMail,
+  sendForgetPasswordMail,
+} = require('../utils/mailTransporter');
+const { REACT_BASE_URL, COMPANY_EMAIL } = require('../utils/constants');
 const user = {};
 user.addUser = async (userobj) => {
   const sql = `INSERT INTO users (username, password, email, phn, name, address) VALUES ('${userobj.username}', '${userobj.password}', '${userobj.email}' , '${userobj.phn}', '${userobj.name}', '${userobj.address}')`;
@@ -20,12 +23,12 @@ user.login = async (userobj) => {
 };
 
 user.getRegionalUsers = async (user) => {
-  let sql = "";
-  if (user.level === "EMP") {
-    throwError("EMP Level Not Authorized", 404);
-  } else if (user.level === "MANAGER") {
+  let sql = '';
+  if (user.level === 'EMP') {
+    throwError('EMP Level Not Authorized', 404);
+  } else if (user.level === 'MANAGER') {
     sql = `SELECT id, username, name FROM users WHERE isactive = 1 AND level = 'EMP'`;
-  } else if (user.level === "ADMIN") {
+  } else if (user.level === 'ADMIN') {
     sql = `SELECT id, username, name FROM users`;
   }
   const res = await query(sql);
@@ -44,8 +47,13 @@ user.forgotpasswordMailer = async (email) => {
   token_expire_time=DATE_ADD(NOW(),INTERVAL 5 MINUTE) WHERE email='${email}'`;
   await query(sqlUpdateToken);
   const url = `${REACT_BASE_URL}/${email}/${token}`;
-  await sendMail(email, url);
+  await sendForgetPasswordMail(email, url);
   return res;
+};
+
+user.contactUsMail = async ({ name, email, phoneNumber, subject, message }) => {
+  const url = `${REACT_BASE_URL}`;
+  await sendContactUsMail(name, email, phoneNumber, subject, message);
 };
 
 user.verifyRecovery = async ({ email, token, password }) => {

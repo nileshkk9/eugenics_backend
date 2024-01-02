@@ -1,17 +1,17 @@
-const express = require("express");
-const userService = require("../services/user");
+const express = require('express');
+const userService = require('../services/user');
 const router = express.Router();
-const auth = require("../middleware/auth");
-router.post("/user/register", async (req, res, next) => {
+const auth = require('../middleware/auth');
+router.post('/user/register', async (req, res, next) => {
   try {
     const token = await userService.addUser(req.body);
-    res.send({ success: "User Registered Successfully", token });
+    res.send({ success: 'User Registered Successfully', token });
   } catch (error) {
     next(error);
   }
 });
 
-router.post("/user/login", async (req, res, next) => {
+router.post('/user/login', async (req, res, next) => {
   try {
     const data = await userService.login(req.body);
     res.send({
@@ -24,7 +24,7 @@ router.post("/user/login", async (req, res, next) => {
   }
 });
 
-router.get("/user/me", auth, async (req, res, next) => {
+router.get('/user/me', auth, async (req, res, next) => {
   try {
     const user = { ...req.user };
     delete user.password;
@@ -38,7 +38,7 @@ router.get("/user/me", auth, async (req, res, next) => {
   }
 });
 
-router.get("/user/all", auth, async (req, res, next) => {
+router.get('/user/all', auth, async (req, res, next) => {
   try {
     const data = await userService.getRegionalUsers(req.user);
     res.send({ data });
@@ -47,16 +47,24 @@ router.get("/user/all", auth, async (req, res, next) => {
   }
 });
 
-router.post("/user/password-reset", async (req, res, next) => {
+router.post('/user/password-reset', async (req, res, next) => {
   try {
     const data = await userService.forgotpasswordMailer(req.body.email);
-    res.send({ message: "Recovery Mail Sent Successfully" });
+    res.send({ message: 'Recovery Mail Sent Successfully' });
+  } catch (error) {
+    next(error);
+  }
+});
+router.post('/user/contact-us-mail', async (req, res, next) => {
+  try {
+    await userService.contactUsMail(req.body);
+    res.send({ message: 'Mail Sent Successfully' });
   } catch (error) {
     next(error);
   }
 });
 
-router.post("/user/password-reset/:email/:token", async (req, res, next) => {
+router.post('/user/password-reset/:email/:token', async (req, res, next) => {
   try {
     const user = {
       email: req.params.email,
@@ -64,7 +72,7 @@ router.post("/user/password-reset/:email/:token", async (req, res, next) => {
       password: req.body.password,
     };
     const data = await userService.verifyRecovery(user);
-    res.send({ message: "Password Changed Successfully" });
+    res.send({ message: 'Password Changed Successfully' });
   } catch (error) {
     next(error);
   }
