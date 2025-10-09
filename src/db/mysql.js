@@ -8,7 +8,7 @@ const connection = mysql.createPool({
   database: process.env.DB_NAME,
   connectTimeout: 30000,
   timeout: 30000,
-  dateStrings: true,
+  dateStrings: true
 });
 const connectionWebsite = mysql.createPool({
   host: process.env.HOST,
@@ -17,7 +17,7 @@ const connectionWebsite = mysql.createPool({
   database: process.env.DB_NAME_OFFICIAL_WEBSITE,
   connectTimeout: 30000,
   timeout: 30000,
-  dateStrings: true,
+  dateStrings: true
 });
 
 const connectionOld = mysql.createPool({
@@ -26,7 +26,7 @@ const connectionOld = mysql.createPool({
   password: process.env.DB_PASS_OLD,
   database: process.env.DB_NAME_OLD,
   connectTimeout: 3 * 60 * 60 * 1000,
-  timeout: 3 * 60 * 60 * 1000,
+  timeout: 3 * 60 * 60 * 1000
 });
 
 const query = util.promisify(connection.query).bind(connection);

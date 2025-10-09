@@ -28,6 +28,7 @@ router.get('/product/:id', async (req, res, next) => {
     next(error);
   }
 });
+
 router.get(
   '/product/getProductByParam/:column/:value',
   async (req, res, next) => {
@@ -42,5 +43,24 @@ router.get(
     }
   }
 );
+
+router.get('/product/diagnostics-equipment/equipment-details', async (req, res, next) => {
+  try {
+    const data = await assetService.getEquipmentDetails();
+    res.send(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/product/diagnostics-equipment/equipment/:slug', async (req, res, next) => {
+  try {
+    const data = await assetService.getEquipmentDetailsBySlug(req.params.slug);
+    res.send(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
 
 module.exports = router;

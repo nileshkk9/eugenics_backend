@@ -23,4 +23,17 @@ assets.getProductByParameter = async (column, value) => {
   const res = await queryWebsite(sql);
   return res;
 };
+
+assets.getEquipmentDetails = async () => {
+  const sql = 'SELECT * from diagnostics_equipment WHERE is_active = 1';
+  const res = await queryWebsite(sql);
+  return res;
+};
+
+assets.getEquipmentDetailsBySlug = async (slug) => {
+  const sql = `SELECT * from diagnostics_equipment WHERE slug = '${slug}'`;
+  const res = await queryWebsite(sql);
+  return res;
+};
+
 module.exports = assets;
