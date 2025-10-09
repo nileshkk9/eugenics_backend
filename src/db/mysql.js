@@ -30,7 +30,9 @@ const connectionOld = mysql.createPool({
 });
 
 const query = util.promisify(connection.query).bind(connection);
-const queryWebsite = util.promisify(connection.query).bind(connectionWebsite);
+const queryWebsite = util
+  .promisify(connectionWebsite.query)
+  .bind(connectionWebsite);
 const queryOld = util.promisify(connectionOld.query).bind(connectionOld);
 
 module.exports = { connection, connectionOld, query, queryOld, queryWebsite };
