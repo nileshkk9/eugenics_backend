@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const util = require('util');
 
 const connection = mysql.createPool({
@@ -7,7 +7,6 @@ const connection = mysql.createPool({
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   connectTimeout: 30000,
-  timeout: 30000,
   dateStrings: true
 });
 const connectionWebsite = mysql.createPool({
@@ -16,17 +15,17 @@ const connectionWebsite = mysql.createPool({
   password: process.env.DB_PASS_OFFICIAL_WEBSITE,
   database: process.env.DB_NAME_OFFICIAL_WEBSITE,
   connectTimeout: 30000,
-  timeout: 30000,
   dateStrings: true
 });
 
+// connectTimeout only — mysql2 does not support pool-level query timeout.
+// Migration queries via queryOld may time out at the server's wait_timeout.
 const connectionOld = mysql.createPool({
   host: process.env.HOST,
   user: process.env.DB_USER_OLD,
   password: process.env.DB_PASS_OLD,
   database: process.env.DB_NAME_OLD,
-  connectTimeout: 3 * 60 * 60 * 1000,
-  timeout: 3 * 60 * 60 * 1000
+  connectTimeout: 3 * 60 * 60 * 1000
 });
 
 const query = util.promisify(connection.query).bind(connection);

@@ -4,14 +4,42 @@ const { throwError, generateToken } = require('../utils/utils');
 const {
   sendContactUsMail,
   sendForgetPasswordMail,
+  sendInviteMail,
 } = require('../utils/mailTransporter');
 const { REACT_BASE_URL, COMPANY_EMAIL } = require('../utils/constants');
 const user = {};
-user.addUser = async (userobj) => {
-  const sql = `INSERT INTO users (username, password, email, phn, name, address) VALUES ('${userobj.username}', '${userobj.password}', '${userobj.email}' , '${userobj.phn}', '${userobj.name}', '${userobj.address}')`;
-  const res = await query(sql);
-  const token = await generateAuthToken(userobj);
-  return token;
+
+user.createInvite = async (adminUser, { email, level }) => {
+  if (adminUser.level !== 'ADMIN') throwError('Only ADMIN can generate invite links', 403);
+  const token = generateToken();
+  await query(
+    `INSERT INTO user_invitations (token, email, level, created_by, expires_at)
+     VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))`,
+    [token, email, level, adminUser.id]
+  );
+  const link = `${REACT_BASE_URL}/register/${token}`;
+  await sendInviteMail(email, link);
+  return { message: 'Invite sent', link };
+};
+
+user.registerViaToken = async (token, { username, password, name, phn, address }) => {
+  const rows = await query(
+    `SELECT * FROM user_invitations WHERE token = ? AND is_used = 0 AND expires_at > NOW()`,
+    [token]
+  );
+  if (rows.length === 0) throwError('Invalid or expired invite link', 400);
+  const invite = rows[0];
+  await query(
+    `INSERT INTO users (username, password, email, phn, name, address, level, isactive)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+    [username, password, invite.email, phn, name, address, invite.level]
+  );
+  await query(
+    `UPDATE user_invitations SET is_used = 1, used_at = NOW() WHERE token = ?`,
+    [token]
+  );
+  const authToken = await generateAuthToken({ username });
+  return { token: authToken, username, name };
 };
 
 user.login = async (userobj) => {
