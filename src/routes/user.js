@@ -2,10 +2,19 @@ const express = require('express');
 const userService = require('../services/user');
 const router = express.Router();
 const auth = require('../middleware/auth');
-router.post('/user/register', async (req, res, next) => {
+router.post('/user/invite', auth, async (req, res, next) => {
   try {
-    const token = await userService.addUser(req.body);
-    res.send({ success: 'User Registered Successfully', token });
+    const data = await userService.createInvite(req.user, req.body);
+    res.send(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/user/register/:token', async (req, res, next) => {
+  try {
+    const data = await userService.registerViaToken(req.params.token, req.body);
+    res.send({ success: 'User Registered Successfully', ...data });
   } catch (error) {
     next(error);
   }

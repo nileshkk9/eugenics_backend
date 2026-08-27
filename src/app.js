@@ -3,6 +3,12 @@ const app = express();
 const cors = require('cors');
 
 require('dotenv').config();
+
+if (!process.env.JWT_KEY) {
+  console.error('FATAL: JWT_KEY environment variable is not set');
+  process.exit(1);
+}
+
 app.use(cors());
 const userRouter = require('./routes/user');
 const reportRouter = require('./routes/report');
