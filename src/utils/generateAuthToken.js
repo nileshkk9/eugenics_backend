@@ -8,8 +8,10 @@ const generateAuthToken = async (user) => {
     { username: user.username.toString() },
     process.env.JWT_KEY
   );
-  const sql = `UPDATE users SET auth_token = '${token}' WHERE username = '${user.username}' `;
-  await query(sql);
+  await query(`UPDATE users SET auth_token = ? WHERE username = ?`, [
+    token,
+    user.username,
+  ]);
   return token;
 };
 

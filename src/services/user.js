@@ -9,6 +9,22 @@ const {
 const { REACT_BASE_URL, COMPANY_EMAIL } = require('../utils/constants');
 const user = {};
 
+const assertAdmin = (adminUser) => {
+  if (adminUser.level !== 'ADMIN') throwError('Only ADMIN can manage users', 403);
+};
+
+const parseUserId = (id) => {
+  const parsed = Number(id);
+  if (!Number.isInteger(parsed) || parsed <= 0) throwError('Invalid user id', 400);
+  return parsed;
+};
+
+const stripSecrets = (row) => {
+  if (!row) return row;
+  const { password, auth_token, token, token_expire_time, ...safe } = row;
+  return safe;
+};
+
 user.createInvite = async (adminUser, { email, level }) => {
   if (adminUser.level !== 'ADMIN') throwError('Only ADMIN can generate invite links', 403);
   const token = generateToken();
@@ -43,11 +59,117 @@ user.registerViaToken = async (token, { username, password, name, phn, address }
 };
 
 user.login = async (userobj) => {
-  const sql = `SELECT * FROM users WHERE username = '${userobj.username}' 
-  AND password = '${userobj.password}'`;
-  const res = await query(sql);
+  const res = await query(
+    `SELECT * FROM users WHERE username = ? AND password = ?`,
+    [userobj.username, userobj.password]
+  );
   if (res.length === 0) throwError(`Invalid Username or Password`);
+  const authToken = await generateAuthToken({ username: res[0].username });
+  res[0].auth_token = authToken;
   return res;
+};
+
+user.getById = async (adminUser, id) => {
+  assertAdmin(adminUser);
+  const userId = parseUserId(id);
+  const rows = await query(`SELECT * FROM users WHERE id = ?`, [userId]);
+  if (rows.length === 0) throwError('User not found', 404);
+  return stripSecrets(rows[0]);
+};
+
+user.updateById = async (adminUser, id, body) => {
+  assertAdmin(adminUser);
+  const userId = parseUserId(id);
+  const rows = await query(`SELECT * FROM users WHERE id = ?`, [userId]);
+  if (rows.length === 0) throwError('User not found', 404);
+  const existing = rows[0];
+
+  const fields = [];
+  const values = [];
+
+  if (body.username !== undefined) {
+    const username = String(body.username).trim();
+    if (!username) throwError('Username is required', 400);
+    if (username !== existing.username) {
+      const taken = await query(
+        `SELECT id FROM users WHERE username = ? AND id <> ?`,
+        [username, userId]
+      );
+      if (taken.length > 0) throwError('Username already in use', 400);
+    }
+    fields.push('username = ?');
+    values.push(username);
+  }
+
+  if (body.name !== undefined) {
+    const name = String(body.name).trim();
+    if (!name) throwError('Name is required', 400);
+    fields.push('name = ?');
+    values.push(name);
+  }
+
+  if (body.email !== undefined) {
+    const email = String(body.email).trim();
+    if (email) {
+      if (email !== existing.email) {
+        const taken = await query(
+          `SELECT id FROM users WHERE email = ? AND id <> ?`,
+          [email, userId]
+        );
+        if (taken.length > 0) throwError('Email already in use', 400);
+      }
+    }
+    fields.push('email = ?');
+    values.push(email);
+  }
+
+  if (body.phn !== undefined) {
+    fields.push('phn = ?');
+    values.push(String(body.phn).trim());
+  }
+
+  if (body.address !== undefined) {
+    fields.push('address = ?');
+    values.push(String(body.address).trim());
+  }
+
+  if (body.password !== undefined && String(body.password).length > 0) {
+    fields.push('password = ?');
+    values.push(String(body.password));
+  }
+
+  if (body.isactive !== undefined) {
+    const isactive =
+      body.isactive === true || body.isactive === 1 || body.isactive === '1'
+        ? 1
+        : body.isactive === false || body.isactive === 0 || body.isactive === '0'
+          ? 0
+          : null;
+    if (isactive === null) throwError('isactive must be 0 or 1', 400);
+    if (isactive === 0 && Number(adminUser.id) === userId) {
+      throwError('You cannot deactivate your own account', 400);
+    }
+    fields.push('isactive = ?');
+    values.push(isactive);
+  }
+
+  if (fields.length === 0) throwError('No fields to update', 400);
+
+  values.push(userId);
+  await query(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
+
+  const updatedRows = await query(`SELECT * FROM users WHERE id = ?`, [userId]);
+  const updated = updatedRows[0];
+  const usernameChanged = updated.username !== existing.username;
+  if (usernameChanged) {
+    await generateAuthToken({ username: updated.username });
+  }
+
+  return {
+    user: stripSecrets(updated),
+    usernameChanged,
+    mustRelogin: usernameChanged && Number(adminUser.id) === userId,
+  };
 };
 
 user.getRegionalUsers = async (user) => {

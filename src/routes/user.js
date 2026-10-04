@@ -56,6 +56,24 @@ router.get('/user/all', auth, async (req, res, next) => {
   }
 });
 
+router.get('/user/:id', auth, async (req, res, next) => {
+  try {
+    const data = await userService.getById(req.user, req.params.id);
+    res.send({ user: data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch('/user/:id', auth, async (req, res, next) => {
+  try {
+    const data = await userService.updateById(req.user, req.params.id, req.body);
+    res.send(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post('/user/password-reset', async (req, res, next) => {
   try {
     const data = await userService.forgotpasswordMailer(req.body.email);
